@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="icon" type="image/png" href="../images/icon.png">
+    <meta charset="UTF-8">
+    <meta name="author" content="Козьяков Арсений Дмитриевич">
+    <meta name="description" content="Лабораторная работа №1 вариант 408815">
+    <style>
+        body {
+            background-image: url("../images/background.jpg");
+        }
+        .container {
+            display: flex;
+        }
+        .box {
+            flex: 1;
+        }
+        #graph {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+            text-align: center;
+        }
+        header[lang="ru"] {
+            font-family: monospace !important ;
+            color: blue;
+            font-size: 40px;
+        }
+        div {
+            border: solid beige;
+            padding: 20px;
+            width: fit-content;
+            height: fit-content;
+        }
+        #xButton #rButton #yButton {
+            background-color: initial;
+            font-weight: 700;
+            line-height: 1.5;
+            border: 2px solid black;
+            padding: 2rem;
+            width: 20px;
+            margin-right: 10px;
+        }
+        label {
+            color: darkcyan;
+        }
+        .SendButton {
+            background-color: crimson;
+        }
+        input {
+            background-color: azure;
+        }
+        .xButton .yButton .rButton {
+            background-color: darkred;
+        }
+        div > table {
+            background-color: azure;
+        }
+    </style>
+</head>
+
+<body>
+<header lang="ru">
+    Козьяков Арсений Дмитриевич группа P3214 вариант 408815
+</header>
+<br>
+<br>
+<div class="container">
+    <div class="box">
+        <form>
+            <div class="X">
+                <label id="xButton">
+                    Enter X
+                    <br>
+                    <input type="button" name="X" value="-5">
+                    <input type="button" name="X" value="-4">
+                    <input type="button" name="X" value="-3">
+                    <input type="button" name="X" value="-2">
+                    <input type="button" name="X" value="-1">
+                    <input type="button" name="X" value="0">
+                    <input type="button" name="X" value="1">
+                    <input type="button" name="X" value="2">
+                    <input type="button" name="X" value="3">
+                    <input type="hidden" id="xInput">
+                </label>
+                <div id = "xError" style = "color: red; display: none"> </div>
+            </div>
+            <br>
+            <div id="yButton">
+                <label>
+                    Enter Y
+                    <br>
+                    <input id="y" type="text" placeholder="must be between (-3;5)" name="Y">
+                </label>
+                <div id="yError" style="color: red; font-size: 12px; display: none;">Y must be a number between -3 and 5.</div>
+            </div>
+
+            <br>
+            <div class="R">
+                <label id="rButton">
+                    <script>
+                        function setSingleCheckbox(checkbox) {
+                            const checkboxes = document.querySelectorAll('input[name="R"]');
+                            checkboxes.forEach((item) => {
+                                if (item !== checkbox) {
+                                    item.checked = false;
+                                }
+                            });
+                        }
+                    </script>
+                    Enter R
+                    <br>
+                     <input type="checkbox" name="R" value="1" onclick="setSingleCheckbox(this)"> 1
+                     <input type="checkbox" name="R" value="2" onclick="setSingleCheckbox(this)"> 2
+                     <input type="checkbox" name="R" value="3" onclick="setSingleCheckbox(this)"> 3
+                     <input type="checkbox" name="R" value="4" onclick="setSingleCheckbox(this)"> 4
+                     <input type="checkbox" name="R" value="5" onclick="setSingleCheckbox(this)"> 5
+                </label>
+                <div id = "rError" style = "color: red; display: none"> </div>
+            </div>
+            <br>
+            <label>
+                <input class="SendButton" type="button" value="now or never">
+            </label>
+        </form>
+        <br>
+        <table id="resultsTable">
+            <thead>
+            <tr>
+                <th>X</th>
+                <th>Y</th>
+                <th>R</th>
+                <th>Hit</th>
+                <th>Execution Time</th>
+                <th>Time</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <div id = "error" style = "color: red; display: none"> </div>
+    </div>
+    <img src="../images/canvas.png">
+</div>
+
+<script>
+
+    let xValue = null;
+    let rValue = null;
+    let error = document.getElementById("error");
+    let xError = document.getElementById("xError");
+    let rError = document.getElementById("rError");
+
+
+    // X-button
+    document.querySelectorAll("input[name='X']").forEach(button => {
+        button.addEventListener("click", () => {
+            document.querySelectorAll("input[name='X']").forEach(btn => btn.style.backgroundColor = "");
+            button.style.backgroundColor = "lightblue";
+            xValue = button.value;
+            if (xValue != 1 && xValue != 2 && xValue != 3 && xValue != 0 &&
+                xValue != -1 && xValue != -2 && xValue != -3 && xValue != -4 && xValue != -5) {
+                console.log("X value is " + xValue);
+                xValue = null
+                button.style.backgroundColor = "white";
+                xError.style.display = "block";
+                xError.style.color = "red";
+                xError.innerHTML = 'X must be integer and between -5 and 3';
+            }
+            else {
+                xError.style.display = "none";
+                console.log("correct x");
+            }
+        });
+    });
+
+    // R-button
+    document.querySelectorAll("input[name='R']").forEach(checkbox => {
+        checkbox.addEventListener("change", () => {
+            document.querySelectorAll("input[name='R']").forEach(cb => {
+                if (cb !== checkbox) cb.checked = false;
+            });
+            rValue = checkbox.checked ? checkbox.value : null;
+            if (checkbox.checked === false) {
+                rValue = null
+                checkbox.checked = false;
+                rError.style.display = "block";
+                rError.style.color = "red";
+                rError.innerHTML = 'R must be chosen';
+            }
+            else if (rValue != 1 && rValue != 2 && rValue != 3 && rValue != 4 && rValue != 5) {
+                console.log("R value is " + xValue);
+                rValue = null
+                checkbox.checked = false;
+                rError.style.display = "block";
+                rError.style.color = "red";
+                rError.innerHTML = 'R must be integer and between 0 and 5';
+            }
+            else {
+                rError.style.display = "none";
+            }
+        });
+    });
+
+    // Validate Y
+    function validateY() {
+        const yInput = document.getElementById("y");
+        let value = yInput.value;
+        value = value.replace(/[^0-9.,-]/g, "");
+        value = value.replace(",", ".");
+        value = value.replace(/(?<!\d)\./g, "");
+        let regex = /^(?:[-]?[0-2][.,]\d+|-4[.,]\d+|(?:-[1-5]|[0-3])([.,]0+)?)$/;
+        let minuses = value.split("-");
+        if (minuses.length > 2) {
+            value = value.slice(0, -1);
+        }
+        let dots = value.split(".");
+        if (dots.length > 2) {
+            value = value.slice(0, -1);
+        }
+        if (value.indexOf("-") > 0) {
+            value = value.replace(/-/g, ""); // Убираем все минусы
+        }
+        yInput.value = value;
+    }
+    document.getElementById("y").addEventListener("input", validateY);
+    function checkY(y) {
+        const yError = document.getElementById("yError");
+        const numericValue = parseFloat(y);
+
+        if (isNaN(numericValue) || numericValue < -3 || numericValue > 5) {
+            yError.style.display = "block";
+            return false;
+        }
+
+        yError.style.display = "none";
+        return true;
+    }
+
+    // Send Button
+    document.querySelector(".SendButton").addEventListener("click", () => {
+        y = document.getElementById("y").value;
+        if (xValue === null) {
+            console.warn("Please select a value for X.");
+            return;
+        }
+        else if (xValue != 1 && xValue != 2 && xValue != 3 && xValue != 0 &&
+            xValue != -1 && xValue != -2 && xValue != -3 && xValue != -4 && xValue != -5) {
+            console.log("X value is " + xValue);
+            xValue = null
+            button.style.backgroundColor = "white";
+            xError.style.display = "block";
+            xError.style.color = "red";
+            xError.innerHTML = 'X must be integer and between -5 and 3';
+        }
+        if (rValue === null) {
+            console.warn("Please select a value for R.");
+            return;
+        }
+        else if (rValue != 1 && rValue != 2 && rValue != 3 && rValue != 4 && rValue != 5) {
+            console.log("R value is " + xValue);
+            rValue = null
+            checkbox.checked = false;
+            rError.style.display = "block";
+            rError.style.color = "red";
+            rError.innerHTML = 'R must be integer and between 0 and 5';
+        }
+        if (!checkY(y)) {
+            console.warn("Please enter a valid value for Y.");
+            return;
+        }
+
+        // Send request
+        let xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:8080/fcgi-bin/Server.jar', true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                try {
+                    let res = JSON.parse(xhr.responseText);
+                    error.style.display = "none";
+                    if (res.error && res.error !== "null") {
+                        error.style.display = "block";
+                        document.getElementById("error").innerHTML = res.error;
+                    }
+                    else {
+                        addRowToTable(res.x, res.y, res.r, res.hit === "true", res.executionTime);
+                    }
+                } catch (error) {
+                    console.error("Error parsing response:", error);
+                }
+            } else {
+                error.style.display = "block";
+                document.getElementById("error").innerHTML = xhr.status;
+            }
+        };
+
+        xhr.onerror = function () {
+            error.style.display = "block";
+            document.getElementById("error").innerHTML = "Connection Error!";
+        };
+
+        let data = JSON.stringify({ x: xValue, y: y, r: rValue });
+        console.log(data);
+        xhr.send(data);
+    });
+
+    // Function to add a row to the table
+    function addRowToTable(x, y, r, hit, executionTime) {
+        const tableBody = document.querySelector("#resultsTable tbody");
+        const newRow = document.createElement("tr");
+
+        const currentTime = new Date().toLocaleTimeString();
+
+        const cells = [x, y, r, hit ? "Yes" : "No", executionTime, currentTime];
+        cells.forEach(cellData => {
+            const cell = document.createElement("td");
+            cell.textContent = cellData; 
+            newRow.appendChild(cell);
+        });
+
+        tableBody.appendChild(newRow);
+    }
+
+
+
+</script>
+</body>
+
+</html>
